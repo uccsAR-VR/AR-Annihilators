@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 
 class blackjack:
 
@@ -143,7 +144,7 @@ class blackjack:
         f.close()
 
     def printsum(self, sum1Player, sum2Player):
-        if (sum1Player==10 or sum1Player==11 or sum1Player==12 or sum1Player==12 or sum1Player==13) :
+        '''if (sum1Player==10 or sum1Player==11 or sum1Player==12 or sum1Player==12 or sum1Player==13) :
             sum1 = 10
         else:
             sum1 = sum1Player
@@ -151,10 +152,12 @@ class blackjack:
         if (sum2Player==10 or sum2Player==11 or sum2Player==12 or sum2Player==12 or sum2Player==13) :
             sum2 = 10
         else:
-            sum2 = sum2Player
+            sum2 = sum2Player'''
         
-        str1 = f"{sum1}\n"
-        str1 += f"{sum2}\n"
+        '''str1 = f"{sum1}\n"
+        str1 += f"{sum2}\n"'''
+        str1 = f"{sum1Player}\n"
+        str1 += f"{sum2Player}\n"
         f = open("probs.txt", "w")
         f.write(str1)
 
@@ -163,11 +166,70 @@ class blackjack:
 
     
 if __name__ == "__main__":
+
+    str1 = ""
+    tempNum = 0
+    addPlayerCards = False
+    addDealerCards = False
+    addDealerCards2 = False
+    sumPlayer = 0
+    sumDealer = 0
+    inlineArgsLength = len(sys.argv)
+    print("Total arguments passed: ", inlineArgsLength)
+    print("\nName of Python script:", sys.argv[0])
+    print("\nArguments passed:", end = " ")
+    for i in range(1, inlineArgsLength):
+        print(sys.argv[i], end = " ")
+        str1 += (sys.argv[i] + " ")
+    f = open("test_inline_args.txt", "w")
+    f.write(str1)
+
     bj = blackjack()
+
     bj.newhand(shuffleafterhand=True)
-    bj.cardplayed((9,1)) #Dealer gets 9
-    bj.cardplayed((12,0)) #Dealer gets Q
-    bj.cardplayed((9,1)) #Dealer gets 9
-    bj.printsum(9,12) # first arg is player, second arg. is dealer.
+    '''bj.cardplayed((9,1)) #Dealer gets 9
+    bj.cardplayed((14,0)) #Dealer gets Q
+    bj.cardplayed((6,1)) #Dealer gets 9
+    bj.cardplayed((14,0)) #Dealer gets 9
+    bj.printsum(9,12) # first arg is player, second arg. is dealer.'''
+
+    print("here")
+    for j in range(1, inlineArgsLength):
+        '''print(sys.argv[j], end = " ")'''
+        
+        if(sys.argv[j] == "d"):
+            addPlayerCards = False
+
+        if(addPlayerCards):
+            tempNum = int((sys.argv[j]))
+            print("card played player: " + str(tempNum) + "\n")
+            bj.cardplayed((tempNum, 0)) #User gets a card
+            sumPlayer += tempNum
+
+        if(addDealerCards):
+            tempNum = int((sys.argv[j]))
+            print("card played dealer: " + str(tempNum) + "\n")
+            bj.cardplayed((tempNum, 1)) #Dealer gets a card
+            sumDealer += tempNum
+
+        '''if(addDealerCards):
+            addDealerCards2 = True
+            addDealerCards = False'''
+
+        if(sys.argv[j] == "p"):
+            addPlayerCards = True
+            
+        if(sys.argv[j] == "d"):
+            addDealerCards = True
+            addPlayerCards = False
+
+    '''bj.cardplayed((9,1)) #Dealer gets 9
+    bj.cardplayed((5,0)) #User gets 5
+    bj.cardplayed((7,1)) #Dealer gets 7
+    bj.cardplayed((5,0)) #User gets 5
+    bj.cardplayed((3,0)) #User gets 3
+
+    bj.printsum(13,16) # first arg is player, second arg. is dealer.'''
+    bj.printsum(sumPlayer,sumDealer)
     bj.getmoves()
     bj.printprobs()
