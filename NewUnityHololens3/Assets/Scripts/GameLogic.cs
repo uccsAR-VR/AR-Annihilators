@@ -10,7 +10,100 @@ using UnityEngine.UI;
 
 public class GameLogic : MonoBehaviour
 {
-    static List<string> argumentList = new List<string>();
+    public static List<string> argumentList = new List<string>();
+    public static List<string> tempListPlayer = new List<string>();
+    public static List<string> tempListDealer = new List<string>();
+    public static List<string> tempListFinal = new List<string>();
+    static GameObject ParticleSys;
+    static ParticleSystem ParticleSysComp;
+    public static int countDealerHitsMAX = 0;
+    public static int countPlayerHitsMAX = 0;
+
+    static void Delay()
+    {
+        for(int i = 0; i < 50000; i++)
+        {
+            for(int j=0; j< 25000; j++)
+            {
+                //
+            }
+        }
+    }
+
+    static List<string> updateCardList(List<string> playerList, List<string> dealerList)
+    {
+        List<string> returnedList = new List<string>();
+        for (int i=0; i < playerList.Count; i++)
+        {
+            returnedList.Add(playerList[i]);
+        }
+
+        for(int j =0; j < dealerList.Count; j++)
+        {
+            returnedList.Add(dealerList[j]);
+        }
+        return returnedList;
+    }//updateCardList
+
+    static void SetDealerPlayerHitCounts()
+    {
+        int dIndex = 0;
+        int dIndex2 = 0;
+        for(int i=1; i < argumentList.Count; i++)
+        {
+            if(argumentList[i] == "d")
+            {
+                dIndex = i;
+            }
+        }//end for
+
+        for (int i = 1; i < argumentList.Count; i++)
+        {
+            if (i < dIndex)
+            {
+                countPlayerHitsMAX += 1;
+            }
+        }//end for
+
+        for (int i = 0; i < argumentList.Count; i++)
+        {
+            if(argumentList[i] == "d")
+            {
+                dIndex2 = i;
+            }
+        }//end for
+
+        for (int i = 0; i < argumentList.Count; i++)
+        {
+            if (i > dIndex2)
+            {
+                countDealerHitsMAX += 1;
+            }
+        }//end for
+    }//end SetDealerPlayerHitCounts
+
+    static int GetPlayerHand(int numberOfHits)
+    {
+        if(argumentList[0]=="p")
+        {
+            return Int32.Parse(argumentList[numberOfHits]);
+        }
+        else
+        {
+            return 0;
+        }
+    }//end GetPlayerCard
+    static int GetDealerHand(int numberOfHits)
+    {
+        for(int i = 0; i < argumentList.Count; i++)
+        {
+            if(argumentList[i]=="d")
+            {
+                return Int32.Parse(argumentList[i + numberOfHits]);
+            }
+        }
+        return 0;
+    }
 
     static string[] GetProbs(List<string> list1)
     {
@@ -31,14 +124,11 @@ public class GameLogic : MonoBehaviour
             {
                 strTemp = "Found p: " + list1[i];
                 UnityEngine.Debug.Log(strTemp);
-                //addPlayerCards = true;
             }
             else if (list1[i] == "d")
             {
                 strTemp = "Found d: " + list1[i];
                 UnityEngine.Debug.Log(strTemp);
-                //addDealerCards = true;
-                //addPlayerCards = false;
             }
         }//end for loop
 
@@ -58,7 +148,6 @@ public class GameLogic : MonoBehaviour
             if (sw.BaseStream.CanWrite)
             {
                 sw.WriteLine("cd C:\\Users\\change\\source\\unity\\NewUnityHololens3\\Assets\\Scripts");
-                //sw.WriteLine("python ./blackjack.py");
                 sw.WriteLine(CMD_execute_with_args);
             }
         }
@@ -85,10 +174,12 @@ public class GameLogic : MonoBehaviour
     public AudioSource winningNoise;
     public AudioSource losingNoise;
     private GameResult result;
-    private int playerHand;
-    private int dealerHand;
+    private int playerHand = 0;
+    private int dealerHand = 0;
     private bool playGame = false;
-        private enum GameResult
+    private int numOfHitsDealer = 0;
+    private int numOfHitsPlayer = 0;
+    private enum GameResult
         {
             PUSH, PLAYER_WIN, PLAYER_BUST, DEALER_WIN, SURRENDER, CONTINUE_PLAYING
         }
@@ -107,27 +198,80 @@ public class GameLogic : MonoBehaviour
         argumentList.Add("9");
         argumentList.Add("7");
         argumentList.Add("3");
-        string[] probsDataArr = GetProbs(argumentList);//elem 0 is sum player, elem 2 is sum dealer, 3rd elem is stand prob, 4th elem is hit prob,
+
+        //string[] probsDataArr = GetProbs(argumentList);//elem 0 is sum player, elem 2 is sum dealer, 3rd elem is stand prob, 4th elem is hit prob,
         //5th elem is checking for split.
-        GameObject ToHit = GameObject.Find("ToHit");
-        GameObject ToStay = GameObject.Find("ToStay");
-        TMP_Text ToHitText;
-        TMP_Text ToStayText;
-        ToHitText = ToHit.GetComponent<TMP_Text>();
-        ToStayText = ToStay.GetComponent<TMP_Text>();
-        ToHitText.text = "Hit: " + probsDataArr[2] + "%";
-        ToStayText.text = "Stay: " + probsDataArr[3] + "%";
+        //GameObject ToHit = GameObject.Find("ToHit");
+        //GameObject ToStay = GameObject.Find("ToStay");
+        //TMP_Text ToHitText;
+        //TMP_Text ToStayText;
+        //ToHitText = ToHit.GetComponent<TMP_Text>();
+        //ToStayText = ToStay.GetComponent<TMP_Text>();
+        //ToHitText.text = "Hit: " + probsDataArr[2] + "%";
+        //ToStayText.text = "Stay: " + probsDataArr[3] + "%";
+
+        ParticleSys = GameObject.Find("particleSystem");
+        ParticleSysComp = ParticleSys.GetComponent<ParticleSystem>();
+        ParticleSysComp.enableEmission = false;
+
+        SetDealerPlayerHitCounts();
+        string str1 = "" + countPlayerHitsMAX;
+        string str2 = "" + countDealerHitsMAX;
+        UnityEngine.Debug.Log(str1 + "\n");
+        UnityEngine.Debug.Log(str2 + "\n");
+
+
+        tempListPlayer.Add("p");
+        tempListDealer.Add("d");
 
     }//end start
 
     // Update is called once per frame
     void Update()
     {
-        
-        playerHand = 13;//test game results
-        dealerHand = 19;
+        GameObject ToHit = GameObject.Find("ToHit");
+        GameObject ToStay = GameObject.Find("ToStay");
+        TMP_Text ToHitText;
+        TMP_Text ToStayText;
+        string[] probsDataArr;
 
-            if (playerHand == 0)
+        numOfHitsPlayer += 1;
+        numOfHitsDealer += 1;
+        if (numOfHitsPlayer <= countPlayerHitsMAX)
+        {
+            playerHand = GetPlayerHand(numOfHitsPlayer) + playerHand;//test game results
+            string str1 = GetPlayerHand(numOfHitsPlayer) + "";
+            tempListPlayer.Add(str1);
+            string temp = "str1: " + str1;
+            string temp2 = "playerHand: " + playerHand;
+            UnityEngine.Debug.Log(temp);
+            UnityEngine.Debug.Log(temp2);
+        }
+
+        if (numOfHitsDealer <= countDealerHitsMAX)
+        {
+            dealerHand = GetDealerHand(numOfHitsDealer) + dealerHand;//test game results
+            string str2 = GetDealerHand(numOfHitsPlayer) + "";
+            tempListDealer.Add(str2);
+            string temp = "str2: " + str2;
+            string temp2 = "dealerHand: " + dealerHand;
+            UnityEngine.Debug.Log(temp);
+            UnityEngine.Debug.Log(temp2);
+        }
+        
+        tempListFinal = updateCardList(tempListPlayer, tempListDealer);
+        probsDataArr = GetProbs(tempListFinal);//elem 0 is sum player, elem 2 is sum dealer, 3rd elem is stand prob, 4th elem is hit prob,
+        //5th elem is checking for split.
+        ToHitText = ToHit.GetComponent<TMP_Text>();
+        ToStayText = ToStay.GetComponent<TMP_Text>();
+        ToHitText.text = "Hit: " + probsDataArr[2] + "%";
+        ToStayText.text = "Stay: " + probsDataArr[3] + "%";
+        if (result != GameResult.PLAYER_WIN)
+        {
+            Delay();
+        }
+
+        if (playerHand == 0)
             {
                 result = GameResult.SURRENDER;
             }
@@ -141,9 +285,9 @@ public class GameLogic : MonoBehaviour
             }
             else if (playerHand > dealerHand && dealerHand != 22)
             {
-                //StartCoroutine(playWinMusic());
                 winningNoise.Play();
                 result = GameResult.PLAYER_WIN;
+                //ParticleSysComp.enableEmission = true;
             }
             else if (dealerHand > 21 && dealerHand != 22)
             {
@@ -151,7 +295,6 @@ public class GameLogic : MonoBehaviour
             }
             else if (dealerHand > playerHand && dealerHand != 22)
             {
-                //StartCoroutine(playLossMusic());
                 losingNoise.Play();
                 result = GameResult.DEALER_WIN;
             }
@@ -159,7 +302,7 @@ public class GameLogic : MonoBehaviour
             {
                 result = GameResult.PUSH;
             }
-
+            new WaitForSeconds(30);
             switch (result)
             {
                 case GameResult.PUSH:
@@ -169,12 +312,10 @@ public class GameLogic : MonoBehaviour
                 case GameResult.PLAYER_WIN:
                     UnityEngine.Debug.Log("Player Wins ");
                     playGame = false;
-                    //result = GameResult.CONTINUE_PLAYING;
                     break;
                 case GameResult.PLAYER_BUST:
                     UnityEngine.Debug.Log("Player Busts");
                     playGame = false;
-                    //result = GameResult.CONTINUE_PLAYING;
                     break;
                 case GameResult.DEALER_WIN:
                     UnityEngine.Debug.Log("Dealer Wins.");
@@ -190,8 +331,7 @@ public class GameLogic : MonoBehaviour
             }
             if (!playGame)
             {
-                new WaitForSeconds(9000);
-
+                
                 Application.Quit();
             }
     }//end update
