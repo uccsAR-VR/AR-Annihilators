@@ -18,16 +18,47 @@ public class GameLogic : MonoBehaviour
     static ParticleSystem ParticleSysComp;
     public static int countDealerHitsMAX = 0;
     public static int countPlayerHitsMAX = 0;
+    public int count = 0;
+    public UnityMainThreadDispatcher dispatcher;
+
 
     static void Delay()
     {
-        for(int i = 0; i < 50000; i++)
+        for (int i = 0; i < 50000; i++)
         {
-            for(int j=0; j< 25000; j++)
+            for (int j = 0; j < 25000; j++)
             {
                 //
             }
         }
+    }
+
+    public IEnumerator ThisWillBeExecutedOnTheMainThread(string[] prob_data_arr2)
+    {
+        //UnityEngine.Debug.Log("This is executed from the main thread");
+        GameObject ToHit = GameObject.Find("ToHit");
+        GameObject ToStay = GameObject.Find("ToStay");
+        TMP_Text ToHitText;
+        TMP_Text ToStayText;
+        ToHitText = ToHit.GetComponent<TMP_Text>();
+        ToStayText = ToStay.GetComponent<TMP_Text>();
+        // Delay();
+        ToHitText.text = "Hit: " + prob_data_arr2[2] + "%";
+        ToStayText.text = "Stay: " + prob_data_arr2[3] + "%";
+        //Delay();
+        UnityEngine.Debug.Log("Hit: " + prob_data_arr2[2] + "%");
+        UnityEngine.Debug.Log("Stay: " + prob_data_arr2[3] + "%");
+            yield return null;
+    }
+    public void ExampleMainThreadCall(string[] prob_data_arr1)
+    {
+        UnityMainThreadDispatcher.Instance().Enqueue(ThisWillBeExecutedOnTheMainThread(prob_data_arr1));
+    }
+
+    public int updateTextUI(string[] prob_data_arr)
+    {
+        ExampleMainThreadCall(prob_data_arr);
+        return 0;
     }
 
     static List<string> updateCardList(List<string> playerList, List<string> dealerList)
@@ -122,13 +153,13 @@ public class GameLogic : MonoBehaviour
 
             if(list1[i] == "p")
             {
-                strTemp = "Found p: " + list1[i];
-                UnityEngine.Debug.Log(strTemp);
+                //strTemp = "Found p: " + list1[i];
+                //UnityEngine.Debug.Log(strTemp);
             }
             else if (list1[i] == "d")
             {
-                strTemp = "Found d: " + list1[i];
-                UnityEngine.Debug.Log(strTemp);
+                //strTemp = "Found d: " + list1[i];
+                //UnityEngine.Debug.Log(strTemp);
             }
         }//end for loop
 
@@ -187,7 +218,15 @@ public class GameLogic : MonoBehaviour
 
     void Start()
     {
-        
+        GameObject ToHit = GameObject.Find("ToHit");
+        GameObject ToStay = GameObject.Find("ToStay");
+        TMP_Text ToHitText;
+        TMP_Text ToStayText;
+        ToHitText = ToHit.GetComponent<TMP_Text>();
+        ToStayText = ToStay.GetComponent<TMP_Text>();
+        ToHitText.text = "%";
+        ToStayText.text = "%";
+
         playGame = true;
         argumentList.Add("p");
         argumentList.Add("5");
@@ -215,26 +254,28 @@ public class GameLogic : MonoBehaviour
         ParticleSysComp.enableEmission = false;
 
         SetDealerPlayerHitCounts();
-        string str1 = "" + countPlayerHitsMAX;
-        string str2 = "" + countDealerHitsMAX;
+        string str1 = "countPlayerHitsMAX: " + countPlayerHitsMAX;
+        string str2 = "countDealerHitsMAX: " + countDealerHitsMAX;
         UnityEngine.Debug.Log(str1 + "\n");
         UnityEngine.Debug.Log(str2 + "\n");
 
 
         tempListPlayer.Add("p");
         tempListDealer.Add("d");
+        //Delay();
 
     }//end start
 
     // Update is called once per frame
     void Update()
     {
-        GameObject ToHit = GameObject.Find("ToHit");
-        GameObject ToStay = GameObject.Find("ToStay");
-        TMP_Text ToHitText;
-        TMP_Text ToStayText;
+        //GameObject ToHit = GameObject.Find("ToHit");
+        //GameObject ToStay = GameObject.Find("ToStay");
+        //TMP_Text ToHitText;
+        //TMP_Text ToStayText;
         string[] probsDataArr;
-
+        int returnedIntUI;
+        count += 1;
         numOfHitsPlayer += 1;
         numOfHitsDealer += 1;
         if (numOfHitsPlayer <= countPlayerHitsMAX)
@@ -262,14 +303,27 @@ public class GameLogic : MonoBehaviour
         tempListFinal = updateCardList(tempListPlayer, tempListDealer);
         probsDataArr = GetProbs(tempListFinal);//elem 0 is sum player, elem 2 is sum dealer, 3rd elem is stand prob, 4th elem is hit prob,
         //5th elem is checking for split.
-        ToHitText = ToHit.GetComponent<TMP_Text>();
-        ToStayText = ToStay.GetComponent<TMP_Text>();
-        ToHitText.text = "Hit: " + probsDataArr[2] + "%";
-        ToStayText.text = "Stay: " + probsDataArr[3] + "%";
-        if (result != GameResult.PLAYER_WIN)
+        //ToHitText = ToHit.GetComponent<TMP_Text>();
+        //ToStayText = ToStay.GetComponent<TMP_Text>();
+        // Delay();
+        //ToHitText.text = "Hit: " + probsDataArr[2] + "%";
+        //ToStayText.text = "Stay: " + probsDataArr[3] + "%";
+        //UnityEngine.Debug.Log("Hit: " + probsDataArr[2] + "%");
+        //UnityEngine.Debug.Log("Stay: " + probsDataArr[3] + "%");
+        returnedIntUI = updateTextUI(probsDataArr);
+        if(returnedIntUI == 0)
         {
-            Delay();
+            UnityEngine.Debug.Log("returned successfully.");        
         }
+        else
+        {
+            UnityEngine.Debug.Log("ERROR");
+        }
+
+        //if (result != GameResult.PLAYER_WIN)
+        //{
+            //Delay();
+        //}
 
         if (playerHand == 0)
             {

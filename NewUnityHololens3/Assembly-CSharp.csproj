@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\stopParticleSystem.cs" />
     <Compile Include="Assets\Scripts\GameLogic.cs" />
+    <Compile Include="Assets\Scripts\UnityMainThreadDispatcher.cs" />
     <Compile Include="Assets\Scripts\StartButton.cs" />
     <Compile Include="Assets\Scripts\MusicScript.cs" />
   </ItemGroup>
